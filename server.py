@@ -1,6 +1,6 @@
 
 from flask import Flask, request
-from flask_socketio import SocketIO, emit, join_room
+from flask_socketio import SocketIO, emit, join_room, leave_room
 
 app = Flask(__name__)
 app.secret_key = 'random secret key!'
@@ -13,7 +13,7 @@ def join(message):
     room = message['room']
     join_room(room)
     print('RoomEvent: {} has joined the room {}\n'.format(username, room))
-    emit('ready', {username: username}, to=room, skip_sid=request.sid)
+    emit('ready', username, to=room, skip_sid=request.sid)
 
 
 @socketio.on('data')
@@ -22,8 +22,15 @@ def transfer_data(message):
     room = message['room']
     data = message['data']
     print('DataEvent: {} has sent the data:\n {}\n'.format(username, data))
-    emit('data', data, to=room, skip_sid=request.sid)
+    emit('data', (data, username), to=room, skip_sid=request.sid)
 
+@socketio.on('leave')
+def leave(message):
+    username = message['username']
+    room = message['room']
+    leave_room(room)
+    print('RoomEvent: {} has left the room {}\n'.format(username, room))
+    emit('leave', username, to=room, skip_sid=request.sid)
 
 @socketio.on_error_default
 def default_error_handler(e):
