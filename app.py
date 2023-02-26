@@ -6,14 +6,23 @@ app = Flask(__name__)
 app.secret_key = 'random secret key!'
 socketio = SocketIO(app, cors_allowed_origins="*")
 
+room_user_counts = {}
 
 @socketio.on('join')
 def join(message):
     username = message['username']
     room = message['room']
-    join_room(room)
-    print('RoomEvent: {} has joined the room {}\n'.format(username, room))
-    emit('ready', username, to=room, skip_sid=request.sid)
+    max_users = 4 
+    if room not in room_user_counts:
+        room_user_counts[room] = 1
+    elif room_user_counts[room] < max_users:
+        join_room(room)
+        room_user_counts[room] += 1
+        print('RoomEvent: {} has joined the room {}\n'.format(username, room))
+        emit('ready', username, to=room, skip_sid=request.sid)
+    else:
+        print('RoomEvent: {} can not join the room {}\n'.format(username, room))
+        emit('room_full', {'message': 'Room is full!'}, room=request.sid)
 
 
 @socketio.on('data')
@@ -28,9 +37,11 @@ def transfer_data(message):
 def leave(message):
     username = message['username']
     room = message['room']
-    leave_room(room)
-    print('RoomEvent: {} has left the room {}\n'.format(username, room))
-    emit('leave', username, to=room, skip_sid=request.sid)
+    if room in room_user_counts and room_user_counts[room] > 0:
+        leave_room(room)
+        room_user_counts[room] -= 1
+        print('RoomEvent: {} has left the room {}\n'.format(username, room))
+        emit('leave', username, to=room, skip_sid=request.sid)
 
 @socketio.on_error_default
 def default_error_handler(e):
