@@ -14,6 +14,7 @@ def join(message):
     room = message['room']
     max_users = 4 
     if room not in room_user_counts:
+        join_room(room)
         room_user_counts[room] = 1
     elif room_user_counts[room] < max_users:
         join_room(room)
@@ -42,6 +43,14 @@ def leave(message):
         room_user_counts[room] -= 1
         print('RoomEvent: {} has left the room {}\n'.format(username, room))
         emit('leave', username, to=room, skip_sid=request.sid)
+
+@socketio.on('message')
+def send_message(message):
+    username = message['username']
+    room = message['room']
+    message = message['message']
+    print('RoomEvent: {} has sent message to room {}\n'.format(username, room))
+    emit('message', (message, username), to=room, skip_sid=request.sid)
 
 @socketio.on_error_default
 def default_error_handler(e):
