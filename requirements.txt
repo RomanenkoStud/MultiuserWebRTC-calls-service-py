@@ -9,4 +9,3 @@ transformers
 wikipedia-api
 requests
 torch
-tensorflow
