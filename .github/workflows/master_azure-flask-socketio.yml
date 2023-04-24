@@ -60,4 +60,4 @@ jobs:
         with:
           app-name: 'azure-flask-socketio'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_AD313861E6F64302899E4AA229C4FF6D }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_32E40925C2984CAEA7D48A4F5461499C }}
