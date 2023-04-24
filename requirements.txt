@@ -6,5 +6,5 @@ gevent-websocket
 spacy
 nltk
 transformers
-wikipediaapi
+wikipedia-api
 requests
